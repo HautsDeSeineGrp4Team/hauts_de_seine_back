@@ -5,10 +5,7 @@ from typing import Optional, List
 from pydantic import EmailStr
 from models.role import Role
 from models.status import Status
-
-###################################################
-###################### USER #######################
-###################################################
+from sqlalchemy import Column, ARRAY
 
 class UserBase(SQLModel):
     nom: str = Field(max_length=255)
@@ -65,10 +62,6 @@ class UserPrivate(UserBase):
     id: uuid.UUID
 
 
-################################################
-####################Product####################
-###############################################
-
 class ProductBase(SQLModel):
     """
     Base class for product-related data shared between creation, update, and the database model.
@@ -82,11 +75,12 @@ class ProductBase(SQLModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     deposed_at: Optional[datetime] = None
+    photos: Optional[List[str]] = []  # List of photo URLs (optional)
 
 class Product(ProductBase, table=True):
     """
     Product model representing the actual product table in the database.
-    Includes all the necessary fields.
+    Includes all the necessary fields, including relationships and photos.
     """
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id", nullable=True)
@@ -104,7 +98,6 @@ class Product(ProductBase, table=True):
         back_populates="association_products",
         sa_relationship_kwargs={"foreign_keys": "Product.association_user_id"}
     )
-    photos: str = Field(default="[]", nullable=False)
 
 class ProductCreate(SQLModel):
     """
@@ -135,7 +128,7 @@ class ProductUpdate(SQLModel):
     association_user_id: Optional[uuid.UUID] = None
     updated_at: Optional[datetime] = Field(default_factory=lambda: datetime.now(timezone.utc))
     photos: Optional[List[str]] = []
-
+    # List of photo URLs (optional)
 class ProductUpdateStatus(SQLModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     status: Status
