@@ -75,10 +75,10 @@ class ProductBase(SQLModel):
 
 class Product(ProductBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="user.id")
+    user_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id", nullable=True)
     mairie_user_id: uuid.UUID = Field(foreign_key="user.id")
-    association_user_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
-    user: "User" = Relationship(
+    association_user_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id", nullable=True)
+    user: Optional["User"] = Relationship(
         back_populates="products",
         sa_relationship_kwargs={"foreign_keys": "Product.user_id"}
     )
@@ -92,14 +92,13 @@ class Product(ProductBase, table=True):
     )
     photos: List["Photo"] = Relationship(back_populates="product")
 
-
 class ProductCreate(SQLModel):
     title: str = Field(max_length=255)
     description: str = Field(max_length=255)
     productIssue: str = Field(max_length=255)
     marque: str = Field(max_length=255)
     status: Status
-    user_id: uuid.UUID
+    user_id: Optional[uuid.UUID] = None
     mairie_user_id: uuid.UUID
 
 class ProductUpdate(SQLModel):
