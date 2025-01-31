@@ -23,14 +23,14 @@ async def create_new_product_with_images(
     current_date = datetime.datetime.now().strftime("%Y%m%d")
     random_part = str(uuid.uuid4()).split("-")[0]
     reference = f"PRD-{current_date}-{random_part}"
-    
-    user = get_user_by_id(db, product.user_id)
+
+    user = get_user_by_id(db, product.user_id) if product.user_id else None
     mairie_user = get_user_by_id(db, product.mairie_user_id)
-    if user is None or mairie_user is None:
-        raise HTTPException(status_code=404, detail="Utilisateur non trouvé.")
+    if mairie_user is None:
+        raise HTTPException(status_code=404, detail="Mairie utilisateur non trouvé.")
 
     product_data = product.dict(exclude={'photos', 'user_id', 'mairie_user_id'})
-    product_db = Product(**product_data, reference=reference, user_id=user.id, mairie_user_id=mairie_user.id)
+    product_db = Product(**product_data, reference=reference, user_id=user.id if user else None, mairie_user_id=mairie_user.id)
 
     photos = []
     try:
