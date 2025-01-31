@@ -23,14 +23,14 @@ async def create_new_product_with_images(
     current_date = datetime.datetime.now().strftime("%Y%m%d")
     random_part = str(uuid.uuid4()).split("-")[0]
     reference = f"PRD-{current_date}-{random_part}"
-    
-    user = get_user_by_id(db, product.user_id)
+
+    user = get_user_by_id(db, product.user_id) if product.user_id else None
     mairie_user = get_user_by_id(db, product.mairie_user_id)
-    if user is None or mairie_user is None:
-        raise HTTPException(status_code=404, detail="Utilisateur non trouvé.")
+    if mairie_user is None:
+        raise HTTPException(status_code=404, detail="Mairie utilisateur non trouvé.")
 
     product_data = product.dict(exclude={'photos', 'user_id', 'mairie_user_id'})
-    product_db = Product(**product_data, reference=reference, user_id=user.id, mairie_user_id=mairie_user.id)
+    product_db = Product(**product_data, reference=reference, user_id=user.id if user else None, mairie_user_id=mairie_user.id)
 
     photos = []
     try:
@@ -266,3 +266,49 @@ def update_product_deposed_at(product_id: uuid.UUID, db: Session = Depends(get_d
     db.refresh(product)
     
     return {"product": product}
+
+@router.get("/mairie/{mairie_id}")
+def get_product_by_mairie_id(mairie_id: uuid.UUID, db: Session = Depends(get_db)):
+    """Retourne les produits de la mairie avec leurs images associées."""
+    mairie = get_user_by_id(db, mairie_id)
+    if mairie is None:
+        raise HTTPException(status_code=404, detail="Mairie non trouvée.")
+    
+    products = db.query(Product).filter(Product.mairie_user_id == mairie.id).all()
+    
+    product_responses = []
+    for product in products:
+        photos = db.query(Photo).filter(Photo.product_id == product.id).all()
+        product_response = ProductResponse(
+            id=product.id,
+            title=product.title,
+            description=product.description,
+            reference=product.reference,
+            images=[Photo(id=photo.id, url=photo.url) for photo in photos]
+        )
+        product_responses.append(product_response)
+    
+    return product_responses
+
+@router.get("/association/{association_id}")
+def get_product_by_association_id(association_id: uuid.UUID, db: Session = Depends(get_db)):
+    """Retourne les produits de l'association avec leurs images associées."""
+    association = get_user_by_id(db, association_id)
+    if association is None:
+        raise HTTPException(status_code=404, detail="Association non trouvée.")
+    
+    products = db.query(Product).filter(Product.association_user_id == association.id).all()
+    
+    product_responses = []
+    for product in products:
+        photos = db.query(Photo).filter(Photo.product_id == product.id).all()
+        product_response = ProductResponse(
+            id=product.id,
+            title=product.title,
+            description=product.description,
+            reference=product.reference,
+            images=[Photo(id=photo.id, url=photo.url) for photo in photos]
+        )
+        product_responses.append(product_response)
+    
+    return product_responses
