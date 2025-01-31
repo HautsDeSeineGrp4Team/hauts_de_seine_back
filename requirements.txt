@@ -8,3 +8,4 @@ passlib[bcrypt]
 psycopg2-binary
 qrcode[pil]
 reportlab
+minio
