@@ -13,7 +13,7 @@ import json
 
 router = APIRouter()
 
-@router.post("/")
+@router.post("/", status_code=201)
 async def create_new_product(
     product: ProductCreate, 
     db: Session = Depends(get_db)
