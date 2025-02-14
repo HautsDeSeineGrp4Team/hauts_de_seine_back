@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List
 from pydantic import EmailStr
+from pydantic_extra_types.phone_numbers import PhoneNumber
 from models.role import Role
 from models.status import Status
 
@@ -11,18 +12,15 @@ from models.status import Status
 ###################################################
 
 class UserBase(SQLModel):
-    nom: str = Field(max_length=255)
-    prenom: str = Field(max_length=255)
+    firstname: str = Field(max_length=255)
+    lastname: str = Field(max_length=255)
     email: EmailStr = Field(unique=True, index=True, max_length=255)
-    telephone: str = Field(max_length=20)
-    role: Role
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    deleted_at: Optional[datetime] = None
+    mobile_phone: str = Field(max_length=20)
 
 class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    password: str = Field(min_length=8, max_length=255)
+    password: str = Field(min_length=8)
+    role: Optional[Role] = Field(default=Role.particulier)
 
     products: List["Product"] = Relationship(
         back_populates="user",
@@ -36,17 +34,19 @@ class User(UserBase, table=True):
         back_populates="association_user",
         sa_relationship_kwargs={"foreign_keys": "Product.association_user_id"}
     )
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class UserCreate(UserBase):
-    password: str = Field(min_length=8, max_length=255)
+    password: str = Field(min_length=8)
 
 
 class UserUpdate(SQLModel):
-    nom: Optional[str] = Field(None, max_length=255)
-    prenom: Optional[str] = Field(None, max_length=255)
+    firstname: Optional[str] = Field(None, max_length=255)
+    lastname: Optional[str] = Field(None, max_length=255)
     email: Optional[EmailStr] = Field(None, unique=True, index=True, max_length=255)
-    telephone: Optional[str] = Field(None, max_length=20)
+    mobile_phone: Optional[str] = Field(None, max_length=20)
     role: Optional[Role] = None
     password: Optional[str] = Field(None, min_length=8, max_length=40)
     updated_at: Optional[datetime] = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -157,3 +157,4 @@ class ProductResponse(SQLModel):
     description: str
     reference: str
     photos: Optional[List[str]] = []
+

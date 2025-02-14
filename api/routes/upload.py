@@ -24,7 +24,8 @@ async def create_upload_file(file: UploadFile = File(...)):
 
 
     # and secret key.
-    client = Minio("minio.cloud.decaweb.fr",
+    client = Minio(
+        os.getenv("S3_BUCKET_ADRESS"),
         access_key=os.getenv('S3_KEYNAME'),
         secret_key=os.getenv("S3_SECRETKEY"),
     )

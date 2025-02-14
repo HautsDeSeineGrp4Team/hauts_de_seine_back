@@ -23,15 +23,13 @@ def get_user_by_id(db: Session, user_id: uuid.UUID) -> User:
     
     return db.query(User).filter(User.id == user_id).first()
 
-def create_user(db: Session, user_create: UserCreate) -> User:
+def create_user(db: Session, user_create: UserCreate):
     """
     Crée un nouvel utilisateur dans la base de données.
     """
-    hashed_password = get_password_hash(user_create.password)# Hachage du mot de passe
-    user_create.password = hashed_password
+    user_create.password = get_password_hash(user_create.password)
     user_data = user_create.dict(exclude_unset=True, exclude={'deleted_at'})
-    user = User(**user_data)# Crée un nouvel utilisateur
-    print(f"User: {user}")
+    user = User(**user_data)
     
     try:
         db.add(user)
@@ -40,5 +38,3 @@ def create_user(db: Session, user_create: UserCreate) -> User:
     except IntegrityError as e:
         db.rollback()
         raise ValueError(f"L'utilisateur avec cet email existe déjà: {e}")
-    
-    return user

@@ -4,6 +4,7 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from db.database import get_db
 from models.models import User
+from models.role import Role
 from core.config import settings
 import jwt
 from fastapi.security import OAuth2PasswordBearer
@@ -40,6 +41,15 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
             detail="Token invalide ou expiré",
         )
 
+def check_authorization(current_user: User = Depends(get_current_user), allowed: list[Role] = []):
 
-# Alias pour l'utilisateur courant afin de l'utiliser facilement dans les dépendances FastAPI
-CurrentUser = Annotated[User, Depends(get_current_user)]
+    if not current_user.role in allowed:
+        raise HTTPException(
+            status_code=401,
+            detail="you are not granted to access this ressource"
+        )
+
+
+#Creating alias for providers
+dep_current_user = Annotated[User, Depends(get_current_user)]
+

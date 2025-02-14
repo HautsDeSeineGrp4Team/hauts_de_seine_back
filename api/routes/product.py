@@ -169,7 +169,7 @@ def update_product_deposed_at(product_id: uuid.UUID, db: Session = Depends(get_d
 def get_product_by_mairie_id(mairie_id: uuid.UUID, db: Session = Depends(get_db)) -> list[ProductResponse] :
     """Retourne les produits de la mairie"""
     mairie = get_user_by_id(db, mairie_id)
-    if mairie is None:
+    if not mairie:
         raise HTTPException(status_code=404, detail="Mairie non trouvée.")
     
     products = db.query(Product).filter(Product.mairie_user_id == mairie.id).all()

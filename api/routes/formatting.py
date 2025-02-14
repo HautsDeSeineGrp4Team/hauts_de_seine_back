@@ -40,13 +40,13 @@ def generate_pdf(mairie_id: uuid.UUID, association_id: uuid.UUID, product_refere
 
     # Sub-header
     c.setFont("Helvetica", 12)
-    c.drawCentredString(300, 730, f"Délivré par la Mairie de {mairie_user.nom}")
+    c.drawCentredString(300, 730, f"Délivré par la Mairie de {mairie_user.lastname}")
 
     # Body content
     c.setFont("Helvetica", 11)
     text_lines = [
         f"Référence du produit : {product.reference}",
-        f"Association bénéficiaire : {association_user.nom} {association_user.prenom}",
+        f"Association bénéficiaire : {association_user.lastname} {association_user.prenom}",
         "",
         "Ce document atteste que l'ordinateur mentionné ci-dessus a été entièrement formaté. ",
         "Toutes les données personnelles ont été supprimées conformément aux normes en vigueur, ",
@@ -75,7 +75,7 @@ def generate_pdf(mairie_id: uuid.UUID, association_id: uuid.UUID, product_refere
 
     # Signature section
     c.setFont("Helvetica-Bold", 12)
-    c.drawString(100, y - 30, f"Signé par la Mairie de {mairie_user.nom}")
+    c.drawString(100, y - 30, f"Signé par la Mairie de {mairie_user.lastname}")
 
     c.setLineWidth(1)
     c.setStrokeColor(colors.darkblue)
@@ -104,7 +104,7 @@ def generate_pdf(mairie_id: uuid.UUID, association_id: uuid.UUID, product_refere
         current_angle += angle_step
 
     text_maire_de = "Maire de"
-    text_nom_mairie = f"{mairie_user.nom}"
+    text_nom_mairie = f"{mairie_user.lastname}"
     text_maire_de_width = c.stringWidth(text_maire_de, "Helvetica-Bold", 10)
     text_nom_mairie_width = c.stringWidth(text_nom_mairie, "Helvetica-Bold", 10)
     c.setFont("Helvetica-Bold", 10)
