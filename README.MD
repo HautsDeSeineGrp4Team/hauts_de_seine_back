@@ -1,41 +1,92 @@
-# Hello Hauts de seine
+# Hauts de Seine Backend
 
+Hauts de Seine Backend is a FastAPI-based project designed for efficient and scalable API development. It includes database integration, testing, and containerized deployment options using Podman or Docker.
 
-## Local dev install 
-Required: python <= 3.12 
+## Prerequisites
 
-Run dev  database
+- **Python**: Version ≤ 3.12
+- **Podman** or **Docker** for containerized deployment
+- **PostgreSQL** (if using a local database)
+
+## Local Development Installation
+
+1. **Start the development database**
+   ```sh
+   podman compose up -d
+   ```
+
+2. **Create a Python virtual environment**
+   ```sh
+   python -m venv .venv
+   ```
+
+3. **Activate the virtual environment**
+   ```sh
+   source .venv/bin/activate  # Windows: .venv\Scripts\activate
+   ```
+
+4. **Install dependencies**
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+## Running the Application
+
+To run the application locally:
 ```sh
-podman compose up -d
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
-Create python venv
+Access the API at: [http://localhost:8000](http://localhost:8000)
+
+## Building for Staging or Production with Podman/Docker
+
+### Build and Run the Image
 ```sh
-python -m venv .venv
+podman build -t pcc:latest .
+podman run --name pcc-prod -p 80:80 \
+  -e POSTGRES_USER=xxxxxx \
+  -e POSTGRES_PASSWORD=xxxxxx \
+  -e POSTGRES_DB=xxxxxxx \
+  -e POSTGRES_HOST=xxxxxx \
+  -e POSTGRES_PORT=xxxxx \
+  --replace pcc:latest
 ```
-Activate venv
+
+For Docker, replace `podman` with `docker`.
+
+## Testing
+
+Ensure the database is running, then execute:
 ```sh
-source .venv/bin/activate
+python -m pytest
 ```
 
-Install dependancies
-```sh
-pip install -r requirements.txt
+## API Documentation
+
+FastAPI automatically generates interactive documentation:
+- **Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+## Environment Variables
+
+The application relies on environment variables. Create a `.env` file with the following:
+```ini
+POSTGRES_USER=your_user
+POSTGRES_PASSWORD=your_password
+POSTGRES_DB=your_database
+POSTGRES_HOST=your_db_host
+POSTGRES_PORT=your_db_port
 ```
 
-## Build for staging or production with podman (the same with docker) 
+## Contributing
 
-Build image
-```sh
-  podman build -t pcc:latest . 
-  podman run --name pcc-prod -p 80:80 -e POSTGRES_USER=xxxxxx -e POSTGRES_PASSWORD=xxxxxx -e POSTGRES_DB=xxxxxxx -e POSTGRES_HOST=xxxxxx -e POSTGRES_PORT=xxxxx --replace pcc:latest
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Commit your changes (`git commit -m 'Add new feature'`).
+4. Push to the branch (`git push origin feature-branch`).
+5. Open a Pull Request.
 
-```
+## License
 
-## Test
-
-### run test
-Database should be up.
-```sh
-python -m pytest 
-```
+This project is licensed under the MIT License.
 
