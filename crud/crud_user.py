@@ -1,5 +1,6 @@
 # crud/crud_user.py
 
+import uuid
 from sqlalchemy.orm import Session
 from models.models import User, UserCreate
 from core.security import get_password_hash
@@ -13,6 +14,14 @@ def get_user_by_email(db: Session, email: str) -> User:
     normalized_email = email.strip().lower()  # Normalise l'email (supprime les espaces et met en minuscule)
     return db.exec(select(User).where(User.email == normalized_email)).first()
 
+def get_user_by_id(db: Session, user_id: uuid.UUID) -> User:
+    """
+    Recherche un utilisateur par son ID.
+    """
+    if not isinstance(user_id, uuid.UUID):
+        raise ValueError(f"L'ID utilisateur '{user_id}' n'est pas un UUID valide.")
+    
+    return db.query(User).filter(User.id == user_id).first()
 
 def create_user(db: Session, user_create: UserCreate) -> User:
     """
@@ -20,7 +29,8 @@ def create_user(db: Session, user_create: UserCreate) -> User:
     """
     hashed_password = get_password_hash(user_create.password)# Hachage du mot de passe
     user_create.password = hashed_password
-    user = User(**user_create.dict())# Crée un nouvel utilisateur
+    user_data = user_create.dict(exclude_unset=True, exclude={'deleted_at'})
+    user = User(**user_data)# Crée un nouvel utilisateur
     print(f"User: {user}")
     
     try:
